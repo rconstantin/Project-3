@@ -7,7 +7,7 @@
 // including how to get a key, at http://developer.echonest.com/docs/v4
 
 var ENAPI = 'https://developer.echonest.com/api/v4/';
-var ENAPIKey = '0TPFPI9TGBX5CJU49';
+var ENAPIKey = 'SSNABSZFZFLLHYWUH';
 
 
 function ENSearch(track) {
@@ -145,7 +145,7 @@ function loudnessSketch(track) {
         var points = []; // (2) an array to hold the points we'll plot
 
         P.setup = function() {
-            P.size(640, 80);
+            P.size(1000, 80);
             if (track.echo) {
                 for (var i = 0; i < numPoints; i++) {
                     loud[i] = loudnessAt(track, dt * i);
@@ -188,6 +188,90 @@ function plotLoudness(track) {
     return P;
 }
 
+////////////////////////////////////////
+// Sketching loudness from EchoNest data
+
+function tempoAt(track, time) {
+    // (1) This function finds the EchoNest measurement of how long a given
+    // track is at a given time.
+
+    // (3) "segments" are EchoNests objects for small bits of a song which are 
+    // acoustically pretty constant.  Read more about them at:
+    // http://developer.echonest.com/docs/v4/_static/AnalyzeDocumentation.pdf
+
+    var timeCovered = 0;
+
+    // (2) Search through and find the segment containing the time we seek;
+    // each segment is _not_ the same duration 
+    for (var i = 0; i < track.echo.audio_analysis.sections.length; i++) {
+        timeCovered += track.echo.audio_analysis.sections[i].duration;
+        if (timeCovered > time) {
+            return track.echo.audio_analysis.sections[i].tempo;
+        }
+    }
+    // else
+    return -1;
+}
+
+
+function tempoSketch(track) {
+    // (2) This function _returns a function_ which Processing runs to make 
+    // our sketch.
+
+    function sketchProc(P1) {
+        var myTrack = track;
+
+        // (2) We'll plot loudness every 0.25 seconds
+        var dt = 0.25;
+        var numPoints = Math.round(myTrack.length) / dt;
+
+        var tempo = []; // (2) an array to hold tempos
+        var points = []; // (2) an array to hold the points we'll plot
+
+        P1.setup = function() {
+            P1.size(400, 80);
+            if (track.echo) {
+                for (var i = 0; i < numPoints; i++) {
+                    tempo[i] = tempoAt(track, dt * i);
+                    points[i] = [i, tempo[i]];
+                }
+
+                // (2) Scale our points down to fill up our width and height
+                points = scalePoints(points, P1.width, P1.height);
+
+
+                // (1) Draw our points in a slightly transparent black
+                P1.noFill();
+                P1.stroke(0, 0.5 * 255);
+                P1.beginShape();
+                for (var j = 0; j < points.length; j++) {
+                    var x = points[j][0];
+                    var y = P1.height + points[j][1];
+                    P1.curveVertex(x, y);
+                }
+                P1.endShape();
+            } else {
+                console.log(track.name, "has no EchoNest data.");
+            }
+        };
+
+        P1.draw = function() {
+            // (2) Since we're not animating, we don't need anything in draw
+        };
+    }
+
+    return sketchProc;
+}
+
+
+function plotTempo(track) {
+    // (1) In this function we actually attach the Processing sketch to our canvas
+
+    var P1 = new Processing(track.canvas, tempoSketch(track));
+
+    return P1;
+}
+
 
 function rowBackground(row) {
     // (1) This function actually plots the loudness in an orphaned canvas
@@ -207,4 +291,20 @@ function rowBackground(row) {
     row.style.backgroundImage = "url(" + binaryImageData + ")";
 
     return binaryImageData;
+}
+
+function coverBackground(track) {
+    // Similar function as row background...
+
+    var cover = document.getElementById('cover');
+    var trackCanvas = document.createElement('canvas');
+    track.canvas = trackCanvas;
+
+    plotTempo(track);
+
+    var binaryImageData = trackCanvas.toDataURL("image/png");
+    cover.style.backgroundImage = "url(" + binaryImageData + ")";
+
+    return binaryImageData;
+
 }

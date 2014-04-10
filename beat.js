@@ -85,7 +85,8 @@ function rowAttrsFromTrack(track) {
         // shortcut for writing out a full if/else statement.  You can read
         // more about it at:
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator
-        'data-tempo': track.echo ? track.echo.audio_summary.tempo : -1
+        'data-tempo': track.echo ? track.echo.audio_summary.tempo : -1,
+        'data-danceability': track.echo ? track.echo.audio_summary.danceability : -1
     };
 
     return attrs;
@@ -140,7 +141,11 @@ function cellsFromTrackAndAttrs(track, attrs) {
         ['tempo', attrs['data-tempo'] > 0 ? // if we have a number
             Math.round(attrs['data-tempo']) : // round it
             '-'
-        ] // otherwise, display it as '-'
+        ], // otherwise, display it as '-'
+        ['danceability', attrs['data-danceability'] > 0 ? // if we have a number
+            Math.round(attrs['data-danceability']*100) : // round it
+            '-'
+        ]
     ];
 
     // (1) Iterate over those cells & wrap that content in an appropriate Node
@@ -170,6 +175,9 @@ function setCurrentTrack(track) {
     // content of our info-container and animating the slide-down transition
     // (as well as, via CSS, the highlighted track change) when we select a
     // track by clicking on its .inter.
+
+    // In addition, we want to add the tempo plot in the background of the cover
+    // panel
 
     if (currentTrack) {
         // (1) If there is a currentTrack, unhighlight it

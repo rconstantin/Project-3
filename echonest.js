@@ -213,6 +213,7 @@ function tempoAt(track, time) {
     return -1;
 }
 
+var tempo = []; // (2) an array to hold tempos
 
 function tempoSketch(track) {
     // (2) This function _returns a function_ which Processing runs to make 
@@ -221,15 +222,15 @@ function tempoSketch(track) {
     function sketchProc(P1) {
         var myTrack = track;
 
-        // (2) We'll plot loudness every 0.25 seconds
-        var dt = 0.25;
+        // (2) We'll plot tempo every 1.125 seconds
+        var dt = 12.5;
         var numPoints = Math.round(myTrack.length) / dt;
 
-        var tempo = []; // (2) an array to hold tempos
+        
         var points = []; // (2) an array to hold the points we'll plot
 
         P1.setup = function() {
-            P1.size(400, 80);
+            P1.size(600, 80);
             if (track.echo) {
                 for (var i = 0; i < numPoints; i++) {
                     tempo[i] = tempoAt(track, dt * i);
@@ -285,26 +286,11 @@ function rowBackground(row) {
 
     plotLoudness(track);
 
+
     // You can read more about this technique at:
     // http://www.html5canvastutorials.com/advanced/html5-canvas-get-image-data-url/
     var binaryImageData = trackCanvas.toDataURL("image/png");
     row.style.backgroundImage = "url(" + binaryImageData + ")";
 
     return binaryImageData;
-}
-
-function coverBackground(track) {
-    // Similar function as row background...
-
-    var cover = document.getElementById('cover');
-    var trackCanvas = document.createElement('canvas');
-    track.canvas = trackCanvas;
-
-    plotTempo(track);
-
-    var binaryImageData = trackCanvas.toDataURL("image/png");
-    cover.style.backgroundImage = "url(" + binaryImageData + ")";
-
-    return binaryImageData;
-
 }

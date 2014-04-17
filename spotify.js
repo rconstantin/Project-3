@@ -57,6 +57,8 @@ function SPIframe(track) {
     // transparent overlay we use to detect events.
     embedContainer.appendChild(iframe);
     embedContainer.appendChild(inter());
+    embedContainer.appendChild(hideSPI());
+
 
     return embedContainer;
 }

@@ -179,6 +179,7 @@ body {
     line-height: 80px;
 
 	text-align: center;
+	width: 96px;
 
 	white-space: nowrap; /* We don't want any multiline cells */
 	overflow: hidden;
@@ -328,6 +329,19 @@ a.sort {
 
 	top: 0;
 	left: 0;
+}
+.embed-container, .hideSPI {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background-color: rgb(132, 132, 141);
+}
+
+.hideSPI {
+	position: absolute;
+
+	top: 50px;
+	left: 50px;
 }
 
 .track iframe {

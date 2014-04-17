@@ -9,6 +9,7 @@ var tracklist = document.getElementById('tracklist');
 
 // (1) An initially empty variable we'll use to point to the current track
 var currentTrack = null;
+var hideDiv = [];
 
 // (1) An array to hold all the tracks we'll be playing with
 var tracks = [];
@@ -175,21 +176,25 @@ function setCurrentTrack(track) {
     // content of our info-container and animating the slide-down transition
     // (as well as, via CSS, the highlighted track change) when we select a
     // track by clicking on its .inter.
-
-    // In addition, we want to add the tempo plot in the background of the cover
-    // panel
-
+ 
     if (currentTrack) {
         // (1) If there is a currentTrack, unhighlight it
         var currentTR = document.getElementById(currentTrack.href);
         currentTR.classList.remove('current-track');
+        hideDiv[0].style.backgroundColor = 'rgb(132, 132, 141)';
     }
 
     // (1) Highlight the new track
     currentTrack = track;
     var trackDiv = document.getElementById(track.href);
-    trackDiv.classList.add('current-track');
+    
+    var child = trackDiv.children[0];
+    var other = child.children[0];
+    hideDiv = other.getElementsByClassName('hideSPI');
+    hideDiv[0].style.backgroundColor = 'transparent';
 
+    trackDiv.classList.add('current-track');
+    
     // (1) Set the cover album art to the URL grabbed from Spotify metadata
     document.getElementById('cover').style.backgroundImage = 'url(' + coverURL(track) + ')';
 
@@ -199,11 +204,30 @@ function setCurrentTrack(track) {
 
     // (1) Fade in all the children of #info-container-- i.e. our track
     // info and album cover	
-    document.getElementById('cover-container').style.opacity = 1;
-    document.getElementById('track-data-container').style.opacity = 1;
+    var cover_container = document.getElementById('cover-container');
+    cover_container.style.opacity = 1;
+
+    var track_container = document.getElementById('track-data-container');
+    track_container.style.opacity = 1;
 
     // (1) Move our container down to display the info-container
-    document.getElementById('container').style.top = (240 + 10) + 'px';
+    var container = document.getElementById('container');
+    container.style.top = (240 + 10) + 'px';
+
+       // In addition, we want to add the tempo plot in the background of the cover
+    // panel
+    var trackCanvas = document.createElement('canvas');
+    
+    track.canvas = trackCanvas;
+
+    plotTempo(track);
+
+
+    // You can read more about this technique at:
+    // http://www.html5canvastutorials.com/advanced/html5-canvas-get-image-data-url/
+    var binaryImageData = trackCanvas.toDataURL("image/png");
+    track_container.style.backgroundImage = "url(" + binaryImageData + ")";
+
 }
 
 
@@ -216,6 +240,15 @@ function inter() {
     interstitial.addEventListener('click', setInters);
 
     return interstitial;
+}
+
+function hideSPI() {
+    // (1) This function generates a simple div we'll use to hide the spotify icon
+
+    var hideSPIcon = document.createElement('div');
+    hideSPIcon.setAttribute('class', 'hideSPI');
+
+    return hideSPIcon;
 }
 
 
@@ -233,7 +266,6 @@ function setInters(e) {
     }
     e.toElement.style.display = 'none';
 }
-
 
 
 //////////////////////////////////////////////////////////////////////////////

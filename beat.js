@@ -16,7 +16,7 @@ var tracks = [];
 
 // (1) We're going to construct our search using Spotify's API, in our case
 // searching for Kanye West and limiting our results to 10 tracks
-var search = 'Kanye West';
+var search = 'Billie Holiday';
 var maxTracks = 10;
 
 
@@ -170,6 +170,7 @@ function cellsFromTrackAndAttrs(track, attrs) {
 
 //////////////////////////////////////////////////////////////////////////////
 // Playback functionality
+var lyrics = null;
 
 function setCurrentTrack(track) {
     // (1) This function implements the interface functionality to change the 
@@ -219,9 +220,12 @@ function setCurrentTrack(track) {
     var trackCanvas = document.createElement('canvas');
     
     track.canvas = trackCanvas;
-
+    lyrics = getLyrics(track);
+    if (lyrics) {
+        track_container.innerHTML(lyrics);
+    }
     plotTempo(track);
-
+   // plotLoudness(track);
 
     // You can read more about this technique at:
     // http://www.html5canvastutorials.com/advanced/html5-canvas-get-image-data-url/
@@ -488,7 +492,7 @@ function scalePoints(points, xRangeMax, yRangeMax) {
     // Figuring out how much we need to shrink our x's and y's by
     var xRatio = xRange / xRangeMax;
     var yRatio = yRange / yRangeMax;
-
+    //if (yRatio < 1) yRatio = 1;
     // Actually shrinking our x's and y's
     var newX = x.map(function(e) {
         return e / xRatio;

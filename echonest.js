@@ -230,7 +230,7 @@ function tempoSketch(track) {
         var points = []; // (2) an array to hold the points we'll plot
 
         P1.setup = function() {
-            P1.size(600, 80);
+            P1.size(1000, 400);
             if (track.echo) {
                 for (var i = 0; i < numPoints; i++) {
                     tempo[i] = tempoAt(track, dt * i);
@@ -239,7 +239,7 @@ function tempoSketch(track) {
 
                 // (2) Scale our points down to fill up our width and height
                 points = scalePoints(points, P1.width, P1.height);
-
+                console.log(points);
 
                 // (1) Draw our points in a slightly transparent black
                 P1.noFill();
@@ -293,4 +293,52 @@ function rowBackground(row) {
     row.style.backgroundImage = "url(" + binaryImageData + ")";
 
     return binaryImageData;
+}
+var lyrics = null;
+var results = null;
+function getLyrics(track) {
+    var key = music_match_key;
+    var url;
+    var artist = track.artists[0].name
+    var song = track.name
+    var songId;
+    //var lyrics;
+    var language;
+   // artist = "Kanye West";
+   // song = "Run This Town";
+    url = ENAPI+"song/search?api_key="+ENAPIKey+"&bucket=id:musixmatch-WW&limit=true&bucket=tracks&format=jsonp&artist="+artist+"&title="+song;
+
+    $.ajax({
+        url: url,
+        jsonp: "callback",
+        dataType: "jsonp",
+        // work with the response
+        success: function( data ) {
+            results = data;
+            if (data.response.songs[0]) {
+                songId = data.response.songs[0].foreign_ids[0].foreign_id.split(':')[2];
+                url = "https://api.musixmatch.com/ws/1.1/track.lyrics.get?track_id=" + songId + "&format=jsonp&apikey=" + key;
+                $.ajax({
+                    url: url,
+                    jsonp: "callback",
+                    dataType: "jsonp",
+
+                    // work with the response
+                    success: function( response ) {
+                        if (response.message.body.lyrics) {
+                            lyrics = response.message.body.lyrics.lyrics_body.replace('******* This Lyrics is NOT for Commercial use *******', '').replace('...', '');
+                            language = response.message.body.lyrics.lyrics_language;
+                        }
+                        else {
+                            return null;
+                        }
+                    }
+                });
+            }
+            else {
+                return null;
+            }
+        }
+    });
+    return lyrics;
 }
